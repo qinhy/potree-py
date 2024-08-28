@@ -7,7 +7,8 @@ import numpy as np
 from typing import List, Union
 
 class Attribute:
-    def __init__(self, name: str = "", description: str = "", size: int = 0, num_elements: int = 0, element_size: int = 0, attribute_type=None):
+    def __init__(self, name: str = "", description: str = "", size: int = 0,
+                 num_elements: int = 0, element_size: int = 0, attribute_type=None):
         self.name = name
         self.description = description
         self.size = size
@@ -193,7 +194,7 @@ class PotreeNode:
         return nodes
 
     def read_all_children_nodes(self):
-        nodes=self.get_all_children()
+        nodes:list[PotreeNode]=self.get_all_children()
         pp = [n.read_node() for n in nodes]
         return pp
 
@@ -406,7 +407,7 @@ class Potree:
 
                     nodes.append(child)
 
-    def child_AABB(self, aabb, index):
+    def child_AABB(self, aabb:PotreeNode.AABB, index):
         min_coords,max_coords = aabb.min.copy(),aabb.max.copy()
         size = [max_coord - min_coord for max_coord, min_coord in zip(aabb.max, aabb.min)]
         min_coords[2] += ( size[2] / 2 if (index & 0b0001) > 0 else -(size[2] / 2) )
@@ -437,15 +438,16 @@ class Potree:
         return self
 
     def bfs(self,node=[],depth=0,resdict={}):
-        node = list(filter(lambda x: x is not None, node))
+        node:list[PotreeNode] = list(filter(lambda x: x is not None, node))
         if len(node)==0:return
         res = []
         resdict[depth] = node
         for i in resdict[depth]:
+            i:PotreeNode=i
             res += i.children
         self.bfs(res,depth+1,resdict)
     
-    def get_nodes_LOD_dict(self):
+    def get_nodes_LOD_dict(self)->dict[int,PotreeNode]:
         res = {}
         self.bfs([self.root],0,res)
         return res
@@ -453,17 +455,17 @@ class Potree:
     def get_max_LOD(self):
         return max(self.get_nodes_LOD_dict().keys())
     
-    def get_nodes_by_LOD(self, lod=0):
+    def get_nodes_by_LOD(self, lod=0)->list[PotreeNode]:
         assert type(lod) == int, 'nodes key must be int!'
         return self.get_nodes_LOD_dict().get(lod,[])
     
-    def _potree_read_node(self,x):
-        return x.read_node()
+    # def _potree_read_node(self,x:PotreePoints):
+    #     return x.read_node()
 
     def get_point_size_by_LOD(self,lod=0):
         return sum([n.num_points for n in self.get_nodes_by_LOD(lod)])
 
-    def get_data_by_LOD(self,data_name=['position'],lod=0):        
+    def get_data_by_LOD(self,data_name:list[str]=['position'],lod=0):        
         # multiproc=False
         res = []
         nodes = self.get_nodes_by_LOD(lod)
