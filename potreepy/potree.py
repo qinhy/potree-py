@@ -481,7 +481,7 @@ class Potree:
                 ps = [getattr(n, 'get_'+name)() for n in nodes]
                 res.append(np.vstack(ps))    
             else:
-                raise ('not function get_'+name)
+                raise ('no function get_'+name)
         return res
     
     def get_position_by_LOD(self, lod=0):
