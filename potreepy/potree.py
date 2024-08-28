@@ -174,7 +174,7 @@ class PotreeNode:
         self.name = name
         self.aabb = aabb
         self.parent = None
-        self.children = [None] * 8
+        self.children:list[PotreeNode] = [None] * 8
         self.node_type = -1
         self.byte_offset = 0
         self.byte_size = 0
@@ -203,7 +203,7 @@ class PotreeNode:
             if child is not None:
                 child.traverse(callback)
 
-    def write_node(self,data_dict):#{'classification':np.ones(n0.num_points,dtype=np.uint8)})
+    def write_node(self,data_dict:dict):#{'classification':np.ones(n0.num_points,dtype=np.uint8)})
         tmpp = self
         while tmpp.path == '':
             tmpp = tmpp.parent
@@ -225,7 +225,7 @@ class PotreeNode:
                     attribute_data_size = attribute.size * self.num_points
                     offset_target = 0
                     if attribute.name in data_dict.keys():
-                        data = data_dict[attribute.name]
+                        data:np.ndarray = data_dict[attribute.name]
                         if len(data.flatten().tobytes())!=attribute_data_size:
                             raise ValueError(f'data size:{data.shape} is not in right bytes!(attribute.size:{attribute.size} , num_points:{self.num_points})')
                         for i in range(points.num_points):
